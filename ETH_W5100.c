@@ -5,6 +5,13 @@
  *      Author: mggarcia
  */
 
+enum{
+
+	OPEN,
+	LISTENING,
+
+};
+
 /*
  ITM0_Write("\r\n SET-UP W5100 \r\n",strlen("\r\n SET-UP W5100 \r\n"));
   //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);

@@ -8,6 +8,11 @@
 #ifndef ETH_W5100_H_
 #define ETH_W5100_H_
 
+char spi_buf[3];
+char spi_addr[3];
+struct w5100
+	{
 
+	};
 
 #endif /* ETH_W5100_H_ */
