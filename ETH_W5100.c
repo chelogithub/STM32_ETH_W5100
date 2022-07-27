@@ -5,183 +5,65 @@
  *      Author: mggarcia
  */
 
-enum{
+#include "ETH_W5100.h"
 
-	OPEN,
-	LISTENING,
+uint8_t  SPI_ETH(struct  W5100_SPI * x )
+{
+	x->TX[0]= x->operacion; //asigno lectura o escritura
+	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_RESET);				// NSS LOW
+	HAL_SPI_TransmitReceive(x->SPI, x->TX , x->RX, 4, 100);						//SPI COMM
+	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_SET);			//NSS HIGH
+	return (x->RX[3]);
+}
 
-};
+uint8_t SPI_ETH_REG(struct W5100_SPI * x, uint8_t addrh, uint8_t addrl, uint8_t op, uint8_t * data, uint8_t lnght)
+{
 
-/*
- ITM0_Write("\r\n SET-UP W5100 \r\n",strlen("\r\n SET-UP W5100 \r\n"));
-  //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-     spi_addr[0]= 0xF0;
-	 spi_addr[1]= 0;
-	 spi_addr[2]= 1;
-	 spi_addr[3]= 192;
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	  HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
- ITM0_Write("\r\n SPI WRITE 0x0001 GAR0 192\r\n",strlen("\r\n SPI WRITE 0x0001 GAR0 192\r\n"));
-	  spi_addr[2]= 2;
-	  spi_addr[3]= 168;
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	  HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE 0x0002 GAR1 168\r\n",strlen("\r\n SPI WRITE 0x0002 GAR0 168\r\n"));
-	  spi_addr[2]= 3;
-	  spi_addr[3]= 0;
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	  HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE 0x0003 GAR2 0\r\n",strlen("\r\n SPI WRITE 0x0003 GAR0 0\r\n"));
-	  spi_addr[2]= 4;
-	  spi_addr[3]= 1;
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	  HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE 0x0004 GAR3 1\r\n",strlen("\r\n SPI WRITE 0x0004 GAR0 1\r\n"));
+ x->TX[0]= op; //asigno lectura o escritura
+ x->TX[1]= addrh;
+ x->TX[2]= addrl;
+ for(int i=0; i<(lnght); i++)
+ {
 
-	spi_addr[2]= 5;
-	spi_addr[3]= 255;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SUBR0 255\r\n",strlen("\r\n SPI WRITE SUBR 255\r\n"));
-	spi_addr[2]= 6;
-	spi_addr[3]= 255;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SUBR1 255\r\n",strlen("\r\n SPI WRITE SUBR 255\r\n"));
-	spi_addr[2]= 7;
-	spi_addr[3]= 255;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SUBR2 255\r\n",strlen("\r\n SPI WRITE SUBR 255\r\n"));
-	spi_addr[2]= 8;
-	spi_addr[3]= 0;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SUBR3 0\r\n",strlen("\r\n SPI WRITE SUBR 0\r\n"));
+	x->TX[3]=data[i];
+	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_RESET);				// NSS LOW
+	HAL_SPI_TransmitReceive(x->SPI, x->TX , x->RX, 4, 100);						//SPI COMM
+	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_SET);			//NSS HIGH
+	x->TX[2]++;
 
-	spi_addr[2]= 9;
-	spi_addr[3]= 0x00;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SHAR0 0\r\n",strlen("\r\n SPI WRITE SHAR0 0\r\n"));
-	spi_addr[2]= 10;
-	spi_addr[3]= 0x08;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SHAR1 0\r\n",strlen("\r\n SPI WRITE SHAR1 0\r\n"));
-	spi_addr[2]= 11;
-	spi_addr[3]= 0xDC;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SHAR2 0\r\n",strlen("\r\n SPI WRITE SHAR2 0\r\n"));
-	spi_addr[2]= 12;
-	spi_addr[3]= 0x00;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SHAR3 0\r\n",strlen("\r\n SPI WRITE SHAR3 0\r\n"));
-	spi_addr[2]= 13;
-	spi_addr[3]= 0x00;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SHAR4 0\r\n",strlen("\r\n SPI WRITE SHAR4 0\r\n"));
-	spi_addr[2]= 14;
-	spi_addr[3]= 0x01;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SHAR5 0\r\n",strlen("\r\n SPI WRITE SHAR5 0\r\n"));
+ }
+
+}
 
 
-	spi_addr[2]= 15;
-	spi_addr[3]= 192;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SIPR0 192\r\n",strlen("\r\n SPI WRITE SIPR0 192\r\n"));
-	spi_addr[2]= 16;
-	spi_addr[3]= 168;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SIPR1 168\r\n",strlen("\r\n SPI WRITE SIPR1 168\r\n"));
-	spi_addr[2]= 17;
-	spi_addr[3]= 0;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SIPR2 0\r\n",strlen("\r\n SPI WRITE SIPR2 0\r\n"));
-	spi_addr[2]= 18;
-	spi_addr[3]= 3;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SIPR3 3\r\n",strlen("\r\n SPI WRITE SIPR3 3\r\n"));
+/*uint8_t SPI_ETH_REGS(struct W5100_SPI * x, uint8_t addrh, uint8_t addrl, uint8_t op, uint8_t gwy1, uint8_t gwy2, uint8_t gwy3, uint8_t gwy4)
+{
+ uint8_t data[4];
+ data[0]=gwy1;
+ data[1]=gwy2;
+ data[2]=gwy3;
+ data[3]=gwy4;
+ x->TX[0]= op; //asigno lectura o escritura
+ x->TX[1]= addrh;
+ x->TX[2]= addrl;
+ for(int i=0; i<4; i++)
+ {
 
-	spi_addr[1]= 0x04;
-	spi_addr[2]= 0x00;
-	spi_addr[3]= 0x01;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SOMR\r\n",strlen("\r\n SPI WRITE SOMR\r\n"));
-	spi_addr[2]= 0x04;
-	spi_addr[3]= 0x01;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SOPORT0\r\n",strlen("\r\n SPI WRITE SOPORT0\r\n"));
-	spi_addr[2]= 0x05;
-	spi_addr[3]= 0xF6;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SOPORT1\r\n",strlen("\r\n SPI WRITE SOPORT1\r\n"));
-	spi_addr[2]= 0x01;
-	spi_addr[3]= 0x01;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SOCR\r\n",strlen("\r\n SPI WRITE SOCR\r\n"));
-	spi_addr[2]= 0x01;
-	spi_addr[3]= 0x02;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, 4, 100);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-ITM0_Write("\r\n SPI WRITE SOCR\r\n",strlen("\r\n SPI WRITE SOCR\r\n"));
+	x->TX[3]=data[i];
+	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_RESET);				// NSS LOW
+	HAL_SPI_TransmitReceive(x->SPI, x->TX , x->RX, 4, 100);						//SPI COMM
+	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_SET);			//NSS HIGH
+	x->TX[2]++;
 
+ }
 
-
-SPI_READ_EN=1;
-spi_addr[0]= 0x0F;
-spi_addr[1]= 0;
-spi_addr[2]= 1;
-spi_addr[3]= 0;
-
-////////// PARA EL READ   ///////////////
- *
- * 	  if(SPI_READ_EN)
-	  {
-	      ITM0_Write("\r\n SPI WRITE FOR READ \r\n",strlen("\r\n SPI WRITE FOR READ \r\n"));
-		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-		  HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)spi_addr, (uint8_t *)spi_buf, spi_addr[19], 100);
-		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 0);
-		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
-	  }
-
-*/
-
+}*/
+/* OLD
+uint8_t  SPI_COM( SPI_HandleTypeDef *SPI, GPIO_TypeDef * GPIONSS , uint16_t a, int  op, char * addr, char * data)
+{
+	addr[0]=op; //asigno lectura o escritura
+	HAL_GPIO_WritePin(GPIONSS, a , GPIO_PIN_RESET);				// NSS LOW
+	HAL_SPI_TransmitReceive(SPI, addr, data, 4, 100);						//SPI COMM
+	HAL_GPIO_WritePin(GPIONSS, a , GPIO_PIN_SET);			//NSS HIGH
+	return (data[3]);
+}*/
