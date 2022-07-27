@@ -49,3 +49,10 @@ static void MX_SPI2_Init(void)
 
 ![](doc/signals.PNG)
 ![](doc/write_read_op.PNG)
+#TCP Server
+## Flujo de trabajo 
+
+![](doc/server_mode.PNG)
+
+## Maquina de estados 
+![](doc/state_machine.PNG)
