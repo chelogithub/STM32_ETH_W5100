@@ -61,6 +61,15 @@ enum
  S0_MR_ADDR_BASEH 		=	0x04,
  S0_MR_ADDR_BASEL   	=	0x00,
 
+ S0_CR_ADDR_BASEH 		=	0x04,
+ S0_CR_ADDR_BASEL   	=	0x01,
+
+ S0_IR_ADDR_BASEH 		=	0x04,
+ S0_IR_ADDR_BASEL   	=	0x02,
+
+ S0_SR_ADDR_BASEH 		=	0x04,
+ S0_SR_ADDR_BASEL   	=	0x03,
+
  S0_PORT_ADDR_BASEH 	=	0x04,
  S0_PORT_ADDR_BASEL   	=	0x04,
 };
@@ -88,6 +97,6 @@ struct W5100_SPI
 
 uint8_t SPI_ETH(struct W5100_SPI *);
 uint8_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * , uint8_t );
-//uint8_t SPI_ETH_REGS(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t  , uint8_t, uint8_t, uint8_t);
+uint8_t SPI_ETH_PORT_CMD(struct W5100_SPI *, uint8_t);
 
 //#endif /* ETH_W5100_H_ */
