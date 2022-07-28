@@ -9,8 +9,57 @@
 //#define ETH_W5100_H_
 #include "main.h"
 
+// ****** Begin COMMON Registers Address ****** //
+enum
+{
+ GAR_ADDR_BASEH 		=	0x00,
+ GAR_ADDR_BASEL   	 	=	0x01,
+ SUBR_ADDR_BASEH 		=	0x00,
+ SUBR_ADDR_BASEL   	 	=	0x05,
+ SHAR_ADDR_BASEH 		=	0x00,
+ SHAR_ADDR_BASEL   	 	=	0x09,
+ SIPR_ADDR_BASEH 		=	0x00,
+ SIPR_ADDR_BASEL   	 	=	0x0F,
+ IR_ADDR_BASEH 		    =	0x00,
+ IR_ADDR_BASEL   	 	=	0x15,
+ IMR_ADDR_BASEH 		=	0x00,
+ IMR_ADDR_BASEL   	 	=	0x16,
+ RMSR_ADDR_BASEH 		=	0x00,
+ RMSR_ADDR_BASEL   	 	=	0x1A,
+ TMSR_ADDR_BASEH 		=	0x00,
+ TMSR_ADDR_BASEL   	 	=	0x1B,
+};
+// ****** End COMMON Registers Address ****** //
 
-// Begin Socket COMMANDS Sn_CR
+// ****** Begin SOCKET0 Registers Address ****** //
+enum
+{
+ S0_MR_ADDR_BASEH 		=	0x04,
+ S0_MR_ADDR_BASEL   	=	0x00,
+ S0_CR_ADDR_BASEH 		=	0x04,
+ S0_CR_ADDR_BASEL   	=	0x01,
+ S0_IR_ADDR_BASEH 		=	0x04,
+ S0_IR_ADDR_BASEL   	=	0x02,
+ S0_SR_ADDR_BASEH 		=	0x04,
+ S0_SR_ADDR_BASEL   	=	0x03,
+ S0_PORT_ADDR_BASEHH 	=	0x04,
+ S0_PORT_ADDR_BASEHL   	=	0x05,
+ S0_PORT_ADDR_BASELH 	=	0x04,
+ S0_PORT_ADDR_BASELL  	=	0x04,
+
+ S0_RX_SZ_ADDR_BASEHH 	=	0x04,
+ S0_RX_SZ_ADDR_BASEHL  	=	0x26,
+ S0_RX_SZ_ADDR_BASELH 	=	0x04,
+ S0_RX_SZ_ADDR_BASELL  	=	0x27,
+
+ S0_RX_RD_ADDR_BASEHH 	=	0x04,
+ S0_RX_RD_ADDR_BASEHL  	=	0x28,
+ S0_RX_RD_ADDR_BASELH 	=	0x04,
+ S0_RX_RD_ADDR_BASELL  	=	0x29,
+};
+// ****** End SOCKET0  Registers Address ****** //
+
+// ****** Begin Socket COMMANDS Sn_CR ****** //
 enum
 {
  OPEN 			=	0x01,
@@ -23,9 +72,10 @@ enum
  SEND_KEEP  	=	0x22,
  RECV 			=	0x40
 };
-// end Socket COMMANDS Sn_CR
 
-// Begin Socket STATUS Sn_SR
+// ****** end Socket COMMANDS Sn_CR ****** //
+
+// ****** Begin Socket STATUS Sn_SR ****** //
 enum
 {
  SOCK_CLOSED 		=	0x00,
@@ -45,34 +95,8 @@ enum
  SOCK_MACRAW		=	0x42,
  SOCK_PPOE			=	0x5F,
 };
-// End Socket STATUS Sn_SR
-// Begin Registers Address
-enum
-{
- GAR_ADDR_BASEH 		=	0x00,
- GAR_ADDR_BASEL   	 	=	0x01,
- SUBR_ADDR_BASEH 		=	0x00,
- SUBR_ADDR_BASEL   	 	=	0x05,
- SHAR_ADDR_BASEH 		=	0x00,
- SHAR_ADDR_BASEL   	 	=	0x09,
- SIPR_ADDR_BASEH 		=	0x00,
- SIPR_ADDR_BASEL   	 	=	0x0F,
+// ****** End Socket STATUS Sn_SR ****** //
 
- S0_MR_ADDR_BASEH 		=	0x04,
- S0_MR_ADDR_BASEL   	=	0x00,
-
- S0_CR_ADDR_BASEH 		=	0x04,
- S0_CR_ADDR_BASEL   	=	0x01,
-
- S0_IR_ADDR_BASEH 		=	0x04,
- S0_IR_ADDR_BASEL   	=	0x02,
-
- S0_SR_ADDR_BASEH 		=	0x04,
- S0_SR_ADDR_BASEL   	=	0x03,
-
- S0_PORT_ADDR_BASEH 	=	0x04,
- S0_PORT_ADDR_BASEL   	=	0x04,
-};
 // Begin Socket SPI
 enum
 {
@@ -90,13 +114,14 @@ struct W5100_SPI
 	char RX[4];
 };
 
+
 // End Socket SPI
 /****************************************************************************
  * Función para el comunicación SPI.
  ****************************************************************************/
-
+void SM_ETH(void);
 uint8_t SPI_ETH(struct W5100_SPI *);
-uint8_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * , uint8_t );
+uint16_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * , uint8_t );
 uint8_t SPI_ETH_PORT_CMD(struct W5100_SPI *, uint8_t);
 
 //#endif /* ETH_W5100_H_ */
