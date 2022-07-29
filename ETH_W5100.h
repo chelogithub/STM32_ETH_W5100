@@ -52,10 +52,11 @@ enum
  S0_RX_SZ_ADDR_BASELH 	=	0x04,
  S0_RX_SZ_ADDR_BASELL  	=	0x27,
 
- S0_RX_RD_ADDR_BASEHH 	=	0x04,
- S0_RX_RD_ADDR_BASEHL  	=	0x28,
- S0_RX_RD_ADDR_BASELH 	=	0x04,
- S0_RX_RD_ADDR_BASELL  	=	0x29,
+ S0_RX_RD_ADDR_BASEHH 	=	0x04, //S0_RX_RD0H
+ S0_RX_RD_ADDR_BASEHL  	=	0x28, //S0_RX_RD0L
+ S0_RX_RD_ADDR_BASELH 	=	0x04, //S0_RX_RD1H
+ S0_RX_RD_ADDR_BASELL  	=	0x29, //S0_RX_RD1L
+ S0_RX_RD0              =   0x0428
 };
 // ****** End SOCKET0  Registers Address ****** //
 
@@ -112,6 +113,7 @@ struct W5100_SPI
 	uint8_t operacion;
 	char TX[4];
 	char RX[4];
+	char data[254];
 };
 
 
@@ -119,9 +121,11 @@ struct W5100_SPI
 /****************************************************************************
  * Función para el comunicación SPI.
  ****************************************************************************/
-void SM_ETH(void);
+void setVar_ETH(void);
 uint8_t SPI_ETH(struct W5100_SPI *);
 uint16_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * , uint8_t );
+uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint16_t );
+uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint8_t * , uint16_t);
 uint8_t SPI_ETH_PORT_CMD(struct W5100_SPI *, uint8_t);
 
 //#endif /* ETH_W5100_H_ */
