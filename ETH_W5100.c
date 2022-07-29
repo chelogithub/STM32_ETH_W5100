@@ -7,6 +7,7 @@
 
 #include "ETH_W5100.h"
 
+
 // ****** Begin Socket Memory assignment ****** //
 uint16_t gS0_RX_BASE = 0x6000;
 uint16_t gS0_RX_MASK = 0x07FF;
@@ -25,6 +26,8 @@ uint16_t gS2_TX_BASE = 0x5000;
 uint16_t gS2_TX_MASK = 0x07FF;
 uint16_t gS3_TX_BASE = 0x5800;
 uint16_t gS3_TX_MASK = 0x07FF;
+
+uint16_t nr016bit = ByteToInt( S0_RX_SZ_ADDR_BASEHH, S0_RX_SZ_ADDR_BASEHL ); // #include "STR_Chelo.h"
 // ****** End Socket Memory assignment ****** //
 
 
@@ -54,24 +57,22 @@ uint16_t SPI_ETH_REG(struct W5100_SPI * x, uint8_t addrh, uint8_t addrl, uint8_t
 	 }
 	 return(res);
  }
- if(op = SPI_READ)
- 	 {
-		 if (lnght==2)
-		 {
-			 for(int i=0; i<(lnght); i++)
-			 		 {
-			 			res=SPI_ETH(x);
-			 			x->TX[2]++;
-
-			 		 }
-			 	 	 return(res);
-		 }else
-					 {
-							res=SPI_ETH(x);
-							x->TX[2]++;
-					 }
-		 	 	 	 return(res);
-
+	 if(op = SPI_READ)
+	 {
+	   if (lnght==2)
+		{
+		for(int i=0; i<(lnght); i++)
+			{
+			res=SPI_ETH(x);
+			x->TX[2]++;
+			}
+		 return(res);
+		}else
+		{
+			res=SPI_ETH(x);
+			x->TX[2]++;
+			return(res);
+		}
  	 }
 }
 
