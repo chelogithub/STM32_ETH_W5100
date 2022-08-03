@@ -98,4 +98,44 @@ void read_data(SOCKET s, vuint8 * src, vuint8 * dst, uint16 len)
 	}
 }
 
+uint16 wiz_read_buf(uint16 addr, uint8* buf,uint16 len)
+{
+#if (__DEF_IINCHIP_BUS__ == __DEF_IINCHIP_DIRECT_MODE__)
+	IINCHIP_ISR_DISABLE();
+	memcpy(buf, (uint8 *)addr, len);
+	IINCHIP_ISR_ENABLE();
+#elif(__DEF_IINCHIP_BUS__ == __DEF_IINCHIP_INDIRECT_MODE__)
+	   uint16 idx = 0;
+	   IINCHIP_ISR_DISABLE();
+	   *((vuint8*)IDM_AR0) = (uint8)((addr & 0xFF00) >> 8);
+	   *((vuint8*)IDM_AR1) = (uint8)(addr & 0x00FF);
+	   for (idx = 0; idx < len ; idx++) buf[idx] = *((vuint8*)IDM_DR);
+	   IINCHIP_ISR_ENABLE();
+#elif (__DEF_IINCHIP_BUS__ == __DEF_IINCHIP_SPI_MODE__)
+	uint16 idx = 0;
+	   IINCHIP_ISR_DISABLE();
+
+	IINCHIP_SpiInit();
+   
+	for (idx=0; idx<len; idx++)
+      	   {
+		IINCHIP_CSoff();                             // CS=0, SPI start 
+
+		IINCHIP_SpiSendData(0x0F);
+		IINCHIP_SpiSendData(((addr+idx) & 0xFF00) >> 8);
+		IINCHIP_SpiSendData((addr+idx) & 0x00FF);
+
+
+		IINCHIP_SpiSendData(0);
+		buf[idx] = IINCHIP_SpiRecvData();
+
+		IINCHIP_CSon();                             // CS=0, SPI end 	   
+	   }
+
+	   IINCHIP_ISR_ENABLE();
+#else
+	#error "unknown bus type"
+#endif
+	return len;
+}
 
