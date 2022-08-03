@@ -8,44 +8,6 @@
 #include "ETH_W5100.h"
 
 
-// ****** Begin Socket Memory assignment ****** //
-/*void setVar_ETH(void)
-{
-	gS0_RX_BASE = 0x6000;
-	gS0_RX_MASK = 0x07FF;
-	gS1_RX_BASE = 0x6800;
-	gS1_RX_MASK = 0x07FF;
-	gS2_RX_BASE = 0x7000;
-	gS2_RX_MASK = 0x07FF;
-	gS3_RX_BASE = 0x7800;
-	gS3_RX_MASK = 0x07FF;
-
-	gS0_TX_BASE = 0x4000;
-	gS0_TX_MASK = 0x07FF;
-	gS1_TX_BASE = 0x4800;
-	gS1_TX_MASK = 0x07FF;
-	gS2_TX_BASE = 0x5000;
-	gS2_TX_MASK = 0x07FF;
-	gS3_TX_BASE = 0x5800;
-	gS3_TX_MASK = 0x07FF;
-
-	S0_get_size = 0;
-	S0_get_offset = 0;
-	S0_RX_RD = 0;
-	S0_get_start_address = 0;
-
-	spi_no_debug=0;
-}*/
-
-// ****** End Socket Memory assignment ****** //
-
-
-
-//uint16_t nr016bit = ByteToInt( S0_RX_SZ_ADDR_BASEHH, S0_RX_SZ_ADDR_BASEHL ); // #include "STR_Chelo.h"
-
-
-
-
 uint8_t  SPI_ETH(struct  W5100_SPI * x )
 {
 	//x->TX[0]= x->operacion; //asigno lectura o escritura
@@ -62,7 +24,8 @@ uint16_t SPI_ETH_REG(struct W5100_SPI * x, uint8_t addrh, uint8_t addrl, uint8_t
  x->TX[0]= op; //asigno lectura o escritura
  x->TX[1]= addrh;
  x->TX[2]= addrl;
- if(op = SPI_WRITE)
+ x->TX[3]=0x00;
+ if(op == SPI_WRITE)
  {
 	 for(int i=0; i<(lnght); i++)
 	 {
@@ -72,15 +35,16 @@ uint16_t SPI_ETH_REG(struct W5100_SPI * x, uint8_t addrh, uint8_t addrl, uint8_t
 	 }
 	 return(res);
  }
-	 if(op = SPI_READ)
+	 if(op == SPI_READ)
 	 {
-	   if (lnght==2)
+		 x->TX[3]=0x00;
+		 if (lnght==2)
 		{
 		for(int i=0; i<(lnght); i++)
 			{
 			res|=SPI_ETH(x);
 			x->TX[2]++;
-			if (i==0)res<<8;
+			if (i==0)res=res<<8;
 			}
 		 return(res);
 		}else
@@ -91,6 +55,7 @@ uint16_t SPI_ETH_REG(struct W5100_SPI * x, uint8_t addrh, uint8_t addrl, uint8_t
 		}
  	 }
 }
+
 uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint16_t  data)
 {
  uint16_t res=0;
@@ -115,19 +80,51 @@ uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint
  }
 
 }
+
 uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint8_t * data, uint16_t lnght )
 {
-	if(op == SPI_READ)
-	 {
+	if(lnght < 2048)
+	{
+		if(op == SPI_READ)
+		 {
+			x->TX[3]=0x00;
+			for(int i=0; i<(lnght); i++)
+				{
+				x->TX[2] = addr & 0x00FF;
+				x->TX[1] = (addr & 0xFF00)>>8;
+				data[i]=SPI_ETH(x);
+				addr++;
+				}
+		 }
+	 return(0);
+	 }
+	else
+	{
+		return(1);
+	}
+}
 
-		for(int i=0; i<(lnght); i++)
-			{
-			x->TX[2] = addr & 0x00FF;
-			x->TX[1] = (addr & 0xFF00)>>8;
-			data[i]=SPI_ETH(x);
-			addr++;
-			}
- 	 }
+uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint8_t * data, uint16_t offset, uint16_t lnght )
+{
+	if(lnght < 2048)
+	{
+		if(op == SPI_READ)
+		 {
+			x->TX[3]=0x00;
+			for(int i=0; i<(lnght); i++)
+				{
+				x->TX[2] = addr & 0x00FF;
+				x->TX[1] = (addr & 0xFF00)>>8;
+				data[i+offset]=SPI_ETH(x);
+				addr++;
+				}
+	 	 }
+		return (0); //Retorno la dirección del puntero a la memoria
+	}
+	else
+	{
+		return(1);
+	}
 }
 
 uint8_t SPI_ETH_PORT_CMD(struct  W5100_SPI * y, uint8_t z)
@@ -139,4 +136,204 @@ uint8_t SPI_ETH_PORT_CMD(struct  W5100_SPI * y, uint8_t z)
 	SPI_ETH(y);
 }
 
+/*
+ *
+ *  ITM0_Write("\r\n SET-UP W5100 \r\n",strlen("\r\n SET-UP W5100 \r\n"));
+  //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+	 ETH.operacion=SPI_WRITE;
+	 ETH.TX[1]= 0;
+	 ETH.TX[2]= 1;
+	 ETH.TX[3]= 192;
+
+	 spi_Data[0]=192;
+	 spi_Data[1]=168;
+	 spi_Data[2]=0;
+	 spi_Data[3]=1;
+	 SPI_ETH_REG(&ETH, GAR_ADDR_BASEH,GAR_ADDR_BASEL,SPI_WRITE, spi_Data,4);
+	 ITM0_Write("\r\nETH-W5100-GATEWAY SET\r\n",strlen("\r\nETH-W5100-GATEWAY SET\r\n"));
+	 spi_Data[0]=255;
+	 spi_Data[1]=255;
+	 spi_Data[2]=255;
+	 spi_Data[3]=0;
+	 SPI_ETH_REG(&ETH, SUBR_ADDR_BASEH,SUBR_ADDR_BASEL,SPI_WRITE, spi_Data,4);
+	 ITM0_Write("\r\nETH-W5100-SUBNET SET\r\n",strlen("\r\nETH-W5100-SUBNET SET"));
+	 spi_Data[0]=0x00;
+	 spi_Data[1]=0x08;
+	 spi_Data[2]=0xDC;
+	 spi_Data[3]=0x00;
+	 spi_Data[4]=0x00;
+	 spi_Data[5]=0x01;
+	 SPI_ETH_REG(&ETH, SHAR_ADDR_BASEH,SHAR_ADDR_BASEL,SPI_WRITE, spi_Data,6);
+	 ITM0_Write("\r\nETH-W5100-MAC SET\r\n",strlen("\r\nETH-W5100-MAC SET"));
+	 spi_Data[0]=192;
+	 spi_Data[1]=168;
+	 spi_Data[2]=0;
+	 spi_Data[3]=3;
+	 SPI_ETH_REG(&ETH, SIPR_ADDR_BASEH,SIPR_ADDR_BASEL,SPI_WRITE, spi_Data,4);
+	 ITM0_Write("\r\nETH-W5100-IP SET\r\n",strlen("\r\nETH-W5100-IP SET"));
+	 spi_Data[0]=0x01;
+	 SPI_ETH_REG(&ETH, S0_MR_ADDR_BASEH,S0_MR_ADDR_BASEL,SPI_WRITE, spi_Data,1);
+	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP SET"));
+	 spi_Data[0]=0x01;
+	 spi_Data[1]=0xF6;  //Puerto 502 0x1F6
+	 SPI_ETH_REG(&ETH, S0_PORT_ADDR_BASELH,S0_PORT_ADDR_BASELL,SPI_WRITE, spi_Data,2);
+	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n"));
+	 spi_Data[0]=0x55;	//2K Memory socket
+	 SPI_ETH_REG(&ETH, RMSR_ADDR_BASEH,RMSR_ADDR_BASEL,SPI_WRITE, spi_Data,1);
+	 ITM0_Write("\r\nETH-W5100-DEFINE SOCKET RX MEMORY 2K\r\n",strlen("\r\nETH-W5100-DEFINE SOCKET RX MEMORY 2K\r\n"));
+	 spi_Data[0]=0x55;	//2K Memory socket
+	 SPI_ETH_REG(&ETH, TMSR_ADDR_BASEH,TMSR_ADDR_BASEL,SPI_WRITE, spi_Data,1);
+	 ITM0_Write("\r\nETH-W5100-DEFINE SOCKET TX MEMORY 2K\r\n",strlen("\r\nETH-W5100-DEFINE SOCKET TX MEMORY 2K\r\n"));
+	 SPI_ETH_PORT_CMD(&ETH, OPEN);
+	 ITM0_Write("\r\nETH-W5100-OPEN SOCKET\r\n",strlen("\r\nETH-W5100-OPEN SOCKET\r\n"));
+	 SPI_ETH_PORT_CMD(&ETH, LISTEN);
+	 ITM0_Write("\r\nETH-W5100-LISTEN SOCKET\r\n",strlen("\r\nETH-W5100-LISTEN SOCKET\r\n"));
+
+
+
+SPI_READ_EN=1;
+ETH.operacion=SPI_READ;
+ETH.TX[1]= 0;
+ETH.TX[2]= 1;
+ETH.TX[3]= 0;
+
+ ----------------------------------------------------------------------------------------------------
+
+
+	  if(spi_no_debug)
+	  	  {
+	  if(SPI_READ_EN)
+	  {
+
+
+		 W5100_socket0_STATUS = SPI_ETH_REG(&ETH, S0_SR_ADDR_BASEH,S0_SR_ADDR_BASEL ,SPI_READ, spi_Data,1);
+	     switch(W5100_socket0_STATUS)
+	     {
+			 case SOCK_CLOSED :
+				 {
+					ITM0_Write("\r\nS0_SOCK_CLOSED \r\n",strlen("\r\nS0_SOCK_CLOSED \r\n"));
+					SPI_ETH_PORT_CMD(&ETH,  OPEN );
+				 }
+			 break;
+			 case  SOCK_INIT :
+				 {
+					ITM0_Write("\r\nS0_SOCK_INIT \r\n",strlen("\r\nS0_SOCK_INIT \r\n"));
+					SPI_ETH_PORT_CMD(&ETH,  LISTEN );
+				 }
+			 break;
+			 case SOCK_LISTEN :
+				 {
+					ITM0_Write("\r\nS0_SOCK_LISTEN \r\n",strlen("\r\nS0_SOCK_LISTEN \r\n"));
+				 }
+			 break;
+			 case SOCK_SYNSENT :
+				 {
+					ITM0_Write("\r\nS0_SOCK_SYNSENT \r\n",strlen("\r\nS0_SOCK_SYNSENT \r\n"));
+				 }
+			 break;
+			 case SOCK_SYNRECV :
+				 {
+					ITM0_Write("\r\nS0_SOCK_SYNRECV \r\n",strlen("\r\nS0_SOCK_SYNRECV \r\n"));
+				 }
+			 break;
+			 case SOCK_ESTABLISHED :
+				 {
+					ITM0_Write("\r\nS0_SOCK_ESTABLISHED \r\n",strlen("\r\nS0_SOCK_ESTABLISHED \r\n"));
+					S0_get_size = SPI_ETH_REG(&ETH, S0_RX_SZ_ADDR_BASEHH,S0_RX_SZ_ADDR_BASEHL ,SPI_READ, spi_Data,2);
+					if(S0_get_size != 0x00)
+					{
+						ITM0_Write("\r\nS0_DATA RECEIVED \r\n",strlen("\r\nS0_DATA RECEIVED \r\n"));
+						S0_RX_RD = SPI_ETH_REG(&ETH, S0_RX_RD_ADDR_BASEHH,S0_RX_RD_ADDR_BASEHL ,SPI_READ, spi_Data,2);
+						S0_get_offset = S0_RX_RD & gS0_RX_MASK;
+						S0_get_start_address  = gS0_RX_BASE + S0_get_offset;
+						S0_bf_rcv_offset=0;
+						if((S0_get_offset  + S0_get_size )>(gS0_RX_MASK + 1))
+						{
+							upper_size = (gS0_RX_MASK + 1) - S0_get_offset ;
+							SPI_ETH_RD_RCV_REG_16(&ETH , S0_get_start_address , SPI_READ , ETH.data , S0_bf_rcv_offset, upper_size);
+							destination_addr+=upper_size;
+							left_size=S0_get_size-upper_size;
+							S0_bf_rcv_offset=upper_size;
+							SPI_ETH_RD_RCV_REG_16(&ETH , gS0_RX_BASE , SPI_READ , ETH.data , S0_bf_rcv_offset, left_size);
+							S0_mem_pointer=S0_RX_RD + S0_get_size;
+						}
+						else
+						{
+
+							SPI_ETH_RD_RCV_REG_16(&ETH , S0_get_start_address , SPI_READ , ETH.data , S0_bf_rcv_offset, S0_get_size);
+							S0_mem_pointer=S0_RX_RD + S0_get_size;
+						}
+						SPI_ETH_WR_REG_16(&ETH, S0_RX_RD0 , SPI_WRITE, S0_mem_pointer );
+						SPI_ETH_PORT_CMD(&ETH, RECV );
+						while( SPI_ETH_REG(&ETH, S0_CR_ADDR_BASEH,S0_CR_ADDR_BASEL ,SPI_READ, spi_Data,1))
+						{}
+
+					}
+
+
+
+				 }
+			 break;
+			 case SOCK_FIN_WAIT :
+				 {
+					ITM0_Write("\r\nS0_SOCK_FIN_WAIT \r\n",strlen("\r\nS0_SOCK_FIN_WAIT \r\n"));
+				 }
+			 break;
+			 case SOCK_CLOSING :
+				 {
+					ITM0_Write("\r\nS0_SOCK_CLOSING \r\n",strlen("\r\nS0_SOCK_CLOSING \r\n"));
+				 }
+			 break;
+			 case  SOCK_TIME_WAIT :
+				 {
+					ITM0_Write("\r\nS0_SOCK_TIME_WAIT \r\n",strlen("\r\nS0_SOCK_TIME_WAIT \r\n"));
+					SPI_ETH_PORT_CMD(&ETH, CLOSE );
+				 }
+			 break;
+			 case SOCK_CLOSE_WAIT :
+				 {
+					ITM0_Write("\r\nS0_SOCK_CLOSE_WAIT \r\n",strlen("\r\nS0_SOCK_CLOSE_WAIT \r\n"));
+					SPI_ETH_PORT_CMD(&ETH, CLOSE );
+				 }
+			 break;
+			 case SOCK_LAST_ACK :
+				 {
+					ITM0_Write("\r\nS0_SOCK_LAST_ACK \r\n",strlen("\r\nS0_SOCK_LAST_ACK \r\n"));
+				 }
+			 break;
+			 case SOCK_UDP :
+				 {
+					ITM0_Write("\r\nS0_SOCK_UDP \r\n",strlen("\r\nS0_SOCK_UDP \r\n"));
+				 }
+			 break;
+			 case  SOCK_IPRAW :
+				 {
+					ITM0_Write("\r\nS0_SOCK_IPRAW \r\n",strlen("\r\nS0_SOCK_IPRAW \r\n"));
+				 }
+			 break;
+			 case  SOCK_MACRAW :
+				 {
+					ITM0_Write("\r\nS0_SOCK_MACRAW \r\n",strlen("\r\nS0_SOCK_MACRAW \r\n"));
+				 }
+			 break;
+			 case SOCK_PPOE :
+				 {
+					ITM0_Write("\r\nS0_SOCK_PPOE \r\n",strlen("\r\nS0_SOCK_PPOE \r\n"));
+				 }
+			 break;
+
+			 default:
+				 {
+
+				 }
+	     }
+	  }
+	  }else
+	  	  {
+		  ETH.operacion=SPI_READ;
+		  ETH.TX[3]=0x00;
+		  SPI_ETH(&ETH);
+	  	  }
+
+*/
 
