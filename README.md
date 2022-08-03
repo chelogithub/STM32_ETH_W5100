@@ -56,3 +56,46 @@ static void MX_SPI2_Init(void)
 
 ## Maquina de estados 
 ![](doc/state_machine.PNG)
+### De la libreria de wiznet
+
+
+
+void recv_data_processing(SOCKET s, uint8 *data, uint16 len)
+{
+	uint16 ptr;
+	ptr = IINCHIP_READ(Sn_RX_RD0(s));
+	ptr = ((ptr & 0x00ff) << 8) + IINCHIP_READ(Sn_RX_RD0(s) + 1);
+#ifdef __DEF_IINCHIP_DBG__
+	printf("ISR_RX: rd_ptr : %.4x\r\n", ptr);
+#endif
+	read_data(s, (uint8 *)ptr, data, len); // read data
+	ptr += len;
+	IINCHIP_WRITE(Sn_RX_RD0(s),(uint8)((ptr & 0xff00) >> 8));
+	IINCHIP_WRITE((Sn_RX_RD0(s) + 1),(uint8)(ptr & 0x00ff));
+}
+
+void read_data(SOCKET s, vuint8 * src, vuint8 * dst, uint16 len)
+{
+	uint16 size;
+	uint16 src_mask;
+	uint8 * src_ptr;
+
+	src_mask = (uint16)src & getIINCHIP_RxMASK(s);
+	src_ptr = (uint8 *)(getIINCHIP_RxBASE(s) + src_mask);
+	
+	if( (src_mask + len) > getIINCHIP_RxMAX(s) ) 
+	{
+		size = getIINCHIP_RxMAX(s) - src_mask;
+		wiz_read_buf((uint16)src_ptr, (uint8*)dst,size);
+		dst += size;
+		size = len - size;
+		src_ptr = (uint8 *)(getIINCHIP_RxBASE(s));
+		wiz_read_buf((uint16)src_ptr, (uint8*) dst,size);
+	} 
+	else
+	{
+		wiz_read_buf((uint16)src_ptr, (uint8*) dst,len);
+	}
+}
+
+
