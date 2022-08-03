@@ -59,7 +59,7 @@ static void MX_SPI2_Init(void)
 ### De la libreria de wiznet
 
 
-
+```c
 void recv_data_processing(SOCKET s, uint8 *data, uint16 len)
 {
 	uint16 ptr;
