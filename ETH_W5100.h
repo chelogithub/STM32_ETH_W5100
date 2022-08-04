@@ -198,13 +198,15 @@ enum
 
 struct W5100_SPI
 {
-	SPI_HandleTypeDef *SPI;
-	GPIO_TypeDef  *PORT;
-	uint16_t PIN;
-	uint8_t operacion;
-	char TX[4];
-	char RX[4];
-	char data[2048];
+	SPI_HandleTypeDef *SPI;		//Hardware SPI tp implement
+	GPIO_TypeDef  *PORT;		//Port for NSS
+	uint16_t PIN;				//Pin number
+	uint8_t operacion;			//Define operation read /write
+
+	char TX[4];					//Vector for TX SPI commands
+	char RX[4];					//Vector for RX SPI commands
+	char data[2048];			//Data readed from SPI
+
 };
 
 
@@ -212,12 +214,44 @@ struct W5100_SPI
 /****************************************************************************
  * Función para el comunicación SPI.
  ****************************************************************************/
-void setVar_ETH(void);
+
 uint8_t SPI_ETH(struct W5100_SPI *);
+/******************************************************************************
+	SPI_ETH Lee o escribe un registro por SPI generando NSS
+
+Primero se debe definir el registro y la operación
+
+estructura.TX[0]=0x0F; for reading 0xF0 for writing ops
+estructura.TX[1]= high address ;
+estructura.TX[2]= low address;
+estructura.TX[3]= data;
+
+function returns readed value
+
+example
+
+raded_value = SPI_ETH(&ETH);
+
+
+/******************************************************************************/
+
+
+SPI_ETH_PORT_CMD(struct W5100_SPI *, uint8_t, uint8_t);
+/******************************************************************************
+	SPI_ETH_PORT_CMD Execute commands on Sn_CMD
+
+First define structure to use "instance SPI"
+Insert command to execute refer to list "Begin Socket COMMANDS Sn_CR
+Insert Socket to apply command
+
+Example:    SPI_ETH_PORT_CMD(&ETH, OPEN, 0 );
+
+/******************************************************************************/
+
 uint16_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * , uint8_t );
 uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint16_t );
 uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint8_t * , uint16_t);
-uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint8_t * , uint16_t, uint16_t);
-uint8_t SPI_ETH_PORT_CMD(struct W5100_SPI *, uint8_t);
+uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * , uint16_t, uint8_t * , uint16_t, uint16_t);
 
+void setVar_ETH(void);
 //#endif /* ETH_W5100_H_ */

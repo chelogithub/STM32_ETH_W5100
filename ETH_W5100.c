@@ -10,7 +10,6 @@
 
 uint8_t  SPI_ETH(struct  W5100_SPI * x )
 {
-	//x->TX[0]= x->operacion; //asigno lectura o escritura
 	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_RESET);				// NSS LOW
 	HAL_SPI_TransmitReceive(x->SPI, x->TX , x->RX, 4, 100);						//SPI COMM
 	HAL_GPIO_WritePin(x->PORT, x->PIN , GPIO_PIN_SET);			//NSS HIGH
@@ -100,16 +99,15 @@ uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint
 	 }
 	else
 	{
-		return(1);
+	return(1);
 	}
 }
 
-uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint8_t * data, uint16_t offset, uint16_t lnght )
+uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t * data, uint16_t offset, uint16_t lnght )
 {
+	x->TX[0]=0x0F; //read operation
 	if(lnght < 2048)
 	{
-		if(op == SPI_READ)
-		 {
 			x->TX[3]=0x00;
 			for(int i=0; i<(lnght); i++)
 				{
@@ -118,19 +116,18 @@ uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, 
 				data[i+offset]=SPI_ETH(x);
 				addr++;
 				}
-	 	 }
 		return (0); //Retorno la dirección del puntero a la memoria
 	}
 	else
 	{
-		return(1);
+	return(1);
 	}
 }
 
-uint8_t SPI_ETH_PORT_CMD(struct  W5100_SPI * y, uint8_t z)
+SPI_ETH_PORT_CMD(struct  W5100_SPI * y, uint8_t z, uint8_t s)
 {
-	y->TX[1]= SPI_WRITE ;
-	y->TX[1]= S0_CR_ADDR_BASEH ;
+	y->TX[0]= SPI_WRITE ;
+	y->TX[1]= S0_CR_ADDR_BASEH + s;
 	y->TX[2]= S0_CR_ADDR_BASEL ;
 	y->TX[3]= z ;		//Lo carga en la info a enviar
 	SPI_ETH(y);
