@@ -203,9 +203,45 @@ struct W5100_SPI
 	uint16_t PIN;				//Pin number
 	uint8_t operacion;			//Define operation read /write
 
-	char TX[4];					//Vector for TX SPI commands
-	char RX[4];					//Vector for RX SPI commands
-	char data[2048];			//Data readed from SPI
+uint8_t     TX[4],				//Vector for TX SPI commands
+			RX[4],				//Vector for RX SPI commands
+			data[2048],			//Data readed from SPI
+
+			GAR[4],
+			SUBR[4],
+			SHAR[6],
+			SIPR[4],
+			RMSR,
+			TMSR,
+			PATR[2],
+			PTIMER,
+			PMAGIC,
+			UIPR[4],
+			UPORT[2],
+
+			socket_PORT[2],
+			socket_HAR[6],
+			socket_IP[4],
+			socket_remote_PORT[2];
+
+uint16_t    gS0_RX_BASE ,
+			gS0_RX_MASK ,
+			gS1_RX_BASE ,
+			gS1_RX_MASK ,
+			gS2_RX_BASE ,
+			gS2_RX_MASK ,
+			gS3_RX_BASE ,
+			gS3_RX_MASK ,
+
+			gS0_TX_BASE ,
+			gS0_TX_MASK ,
+			gS1_TX_BASE ,
+			gS1_TX_MASK ,
+			gS2_TX_BASE ,
+			gS2_TX_MASK ,
+			gS3_TX_BASE ,
+			gS3_TX_MASK ;
+
 
 };
 
@@ -232,24 +268,57 @@ example
 
 raded_value = SPI_ETH(&ETH);
 
-
 /******************************************************************************/
 
 
-SPI_ETH_PORT_CMD(struct W5100_SPI *, uint8_t, uint8_t);
+eth_wr_SOCKET_CMD(struct W5100_SPI *, uint8_t, uint8_t);
 /******************************************************************************
-	SPI_ETH_PORT_CMD Execute commands on Sn_CMD
+	eth_wr_SOCKET_CMD Execute commands on Sn_CR
 
 First define structure to use "instance SPI"
 Insert command to execute refer to list "Begin Socket COMMANDS Sn_CR
 Insert Socket to apply command
 
-Example:    SPI_ETH_PORT_CMD(&ETH, OPEN, 0 );
+Example:    eth_wr_SOCKET_CMD(&ETH, 0, OPEN );
+
+/******************************************************************************/
+
+uint8_t eth_rd_SOCKET_CMD(struct W5100_SPI *, uint8_t);
+/******************************************************************************
+	eth_rd_SOCKET_CMD Read commands on Sn_CR
+
+First define structure to use "instance SPI"
+Insert Socket number to read command from
+
+Example:    read_command=eth_rd_SOCKET_CMD(&ETH, 0 );
+
+/******************************************************************************/
+
+uint8_t eth_rd_SOCKET_STAT(struct W5100_SPI *, uint8_t);
+/******************************************************************************
+	eth_rd_SOCKET_STAT Read Socket status REG Sn_SR
+
+First define structure to use "instance SPI"
+Insert Socket to apply command
+
+Example:    socket_status=eth_rd_SOCKET_STAT(&ETH, 0 );
+
+/******************************************************************************/
+
+uint16_t eth_rd_SOCKET_DATA(struct W5100_SPI *, uint8_t, uint16_t *);
+/******************************************************************************
+	eth_rd_SOCKET_DATA Read Socket data received
+
+First define structure to use "instance SPI"
+Insert Socket to apply command
+Read data points to struct.data and struct.qty for amount of data.
+
+Example:    eth_rd_SOCKET_DATA(&ETH, 0 );
 
 /******************************************************************************/
 
 uint16_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * , uint8_t );
-uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint16_t );
+uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI *  , uint16_t  , uint16_t );
 uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint8_t * , uint16_t);
 uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * , uint16_t, uint8_t * , uint16_t, uint16_t);
 

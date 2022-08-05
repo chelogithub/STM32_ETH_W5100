@@ -55,18 +55,16 @@ uint16_t SPI_ETH_REG(struct W5100_SPI * x, uint8_t addrh, uint8_t addrl, uint8_t
  	 }
 }
 
-uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint16_t  data)
+uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * x, uint16_t addr, uint16_t  data)
 {
  uint16_t res=0;
  uint8_t num[2];
 
- x->TX[0]= op; //asigno lectura o escritura
+ x->TX[0]= SPI_WRITE; //asigno lectura o escritura
 
  num[1] = data & 0x00FF ;
  num[0] = (data & 0xFF00)>>8 ;
 
- if( op == SPI_WRITE)
- {
 	 for(int i=0; i<(2); i++)
 	 {
 		x->TX[2]= addr & 0x00FF;
@@ -76,8 +74,6 @@ uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint
 		res=SPI_ETH(x);
 	 }
 	 return(res);
- }
-
 }
 
 uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t op, uint8_t * data, uint16_t lnght )
@@ -124,13 +120,63 @@ uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t * da
 	}
 }
 
-SPI_ETH_PORT_CMD(struct  W5100_SPI * y, uint8_t z, uint8_t s)
+eth_wr_SOCKET_CMD(struct  W5100_SPI * y, uint8_t s, uint8_t z)
 {
 	y->TX[0]= SPI_WRITE ;
 	y->TX[1]= S0_CR_ADDR_BASEH + s;
 	y->TX[2]= S0_CR_ADDR_BASEL ;
 	y->TX[3]= z ;		//Lo carga en la info a enviar
 	SPI_ETH(y);
+}
+
+uint8_t eth_rd_SOCKET_STAT(struct  W5100_SPI * y, uint8_t socket)
+{
+	y->TX[0]= SPI_READ;
+	y->TX[1]=  S0_SR_ADDR_BASEH + socket;
+	y->TX[2]=  S0_SR_ADDR_BASEL ;
+	y->TX[3]= 0 ;		//Lo carga en la info a enviar
+	SPI_ETH(y);
+	return(y->RX[3]);
+}
+
+uint8_t eth_rd_SOCKET_CMD(struct  W5100_SPI * y, uint8_t socket)
+{
+	y->TX[0]= SPI_READ;
+	y->TX[1]=  S0_CR_ADDR_BASEH + socket;
+	y->TX[2]=  S0_CR_ADDR_BASEL ;
+	y->TX[3]= 0 ;		//Lo carga en la info a enviar
+	SPI_ETH(y);
+	return(y->RX[3]);
+}
+
+uint16_t  eth_rd_SOCKET_DATA(struct W5100_SPI * ETH, uint8_t socket, uint16_t * mem_pointer)
+{
+/*	uint16_t S0_bf_rcv_offset=0,
+			 left_size=0,
+			 upper_size=0,
+			 sestination_addr=0,
+
+
+
+	S0_RX_RD = SPI_ETH_REG(&ETH, S0_RX_RD_ADDR_BASEHH,S0_RX_RD_ADDR_BASEHL ,SPI_READ, spi_Data,2);
+	S0_get_offset = S0_RX_RD & gS0_RX_MASK;
+	S0_get_start_address  = gS0_RX_BASE + S0_get_offset;
+	if((S0_get_offset  + S0_get_size )>(gS0_RX_MASK + 1))
+		{
+			upper_size = (gS0_RX_MASK + 1) - S0_get_offset ;
+			SPI_ETH_RD_RCV_REG_16(&ETH , S0_get_start_address , ETH.data , S0_bf_rcv_offset, upper_size);
+			destination_addr+=upper_size;
+			left_size=S0_get_size-upper_size;
+			S0_bf_rcv_offset=upper_size;
+			SPI_ETH_RD_RCV_REG_16(&ETH , gS0_RX_BASE , ETH.data , S0_bf_rcv_offset, left_size);
+			mem_pointer=S0_RX_RD + S0_get_size;
+		}
+		else
+			{
+				SPI_ETH_RD_RCV_REG_16(&ETH , S0_get_start_address , ETH.data , S0_bf_rcv_offset, S0_get_size);
+				mem_pointer=S0_RX_RD + S0_get_size;
+			}
+	return(S0_mem_pointer)*/
 }
 
 /*
