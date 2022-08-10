@@ -120,11 +120,42 @@ uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t * da
 	}
 }
 
+uint16_t SPI_ETH_WR_TX_REG_16(struct W5100_SPI * x, uint16_t addr, uint8_t * data, uint16_t offset, uint16_t lnght )
+{
+	x->TX[0]=0xF0; //write operation
+	if(lnght < 2048)
+	{
+
+			for(int i=0; i<(lnght); i++)
+				{
+				x->TX[2] = addr & 0x00FF;
+				x->TX[1] = (addr & 0xFF00)>>8;
+				x->TX[3]= x->data[i+offset];
+				SPI_ETH(x);
+				addr++;
+				}
+		return (0); //Retorno la dirección del puntero a la memoria
+	}
+	else
+	{
+	return(1);
+	}
+}
+
 eth_wr_SOCKET_CMD(struct  W5100_SPI * y, uint8_t s, uint8_t z)
 {
 	y->TX[0]= SPI_WRITE ;
 	y->TX[1]= S0_CR_ADDR_BASEH + s;
 	y->TX[2]= S0_CR_ADDR_BASEL ;
+	y->TX[3]= z ;		//Lo carga en la info a enviar
+	SPI_ETH(y);
+}
+
+eth_wr_SOCKET_MODE(struct  W5100_SPI * y, uint8_t s, uint8_t z)
+{
+	y->TX[0]= SPI_WRITE ;
+	y->TX[1]= S0_MR_ADDR_BASEH + s;
+	y->TX[2]= S0_MR_ADDR_BASEL ;
 	y->TX[3]= z ;		//Lo carga en la info a enviar
 	SPI_ETH(y);
 }
@@ -149,34 +180,38 @@ uint8_t eth_rd_SOCKET_CMD(struct  W5100_SPI * y, uint8_t socket)
 	return(y->RX[3]);
 }
 
-uint16_t  eth_rd_SOCKET_DATA(struct W5100_SPI * ETH, uint8_t socket, uint16_t * mem_pointer)
+uint16_t  eth_rd_SOCKET_DATA(struct W5100_SPI * ETH, uint8_t socket, uint16_t * mem_pointer, uint16_t sizedata)
 {
-/*	uint16_t S0_bf_rcv_offset=0,
+	uint16_t S0_bf_rcv_offset=0,
 			 left_size=0,
 			 upper_size=0,
-			 sestination_addr=0,
+			 destination_addr=0,
+			 S0_RX_RD=0,
+			 S0_get_offset=0,
+			 S0_get_start_address=0,
+			 S0_mem_pointer=0;
+	uint8_t spi_Data[2];
 
 
-
-	S0_RX_RD = SPI_ETH_REG(&ETH, S0_RX_RD_ADDR_BASEHH,S0_RX_RD_ADDR_BASEHL ,SPI_READ, spi_Data,2);
-	S0_get_offset = S0_RX_RD & gS0_RX_MASK;
-	S0_get_start_address  = gS0_RX_BASE + S0_get_offset;
-	if((S0_get_offset  + S0_get_size )>(gS0_RX_MASK + 1))
+	S0_RX_RD = SPI_ETH_REG(ETH, S0_RX_RD_ADDR_BASEHH,S0_RX_RD_ADDR_BASEHL ,SPI_READ, spi_Data,2);
+	S0_get_offset = S0_RX_RD & ETH->gS0_RX_MASK;
+	S0_get_start_address  = ETH->gS0_RX_BASE + S0_get_offset;
+	if((S0_get_offset  + sizedata )>(ETH->gS0_RX_MASK + 1))
 		{
-			upper_size = (gS0_RX_MASK + 1) - S0_get_offset ;
-			SPI_ETH_RD_RCV_REG_16(&ETH , S0_get_start_address , ETH.data , S0_bf_rcv_offset, upper_size);
+			upper_size = (ETH->gS0_RX_MASK + 1) - S0_get_offset ;
+			SPI_ETH_RD_RCV_REG_16(ETH , S0_get_start_address , ETH->data , S0_bf_rcv_offset, upper_size);
 			destination_addr+=upper_size;
-			left_size=S0_get_size-upper_size;
+			left_size=sizedata-upper_size;
 			S0_bf_rcv_offset=upper_size;
-			SPI_ETH_RD_RCV_REG_16(&ETH , gS0_RX_BASE , ETH.data , S0_bf_rcv_offset, left_size);
-			mem_pointer=S0_RX_RD + S0_get_size;
+			SPI_ETH_RD_RCV_REG_16(ETH , ETH->gS0_RX_BASE , ETH->data , S0_bf_rcv_offset, left_size);
+			*mem_pointer=S0_RX_RD + sizedata;
 		}
 		else
 			{
-				SPI_ETH_RD_RCV_REG_16(&ETH , S0_get_start_address , ETH.data , S0_bf_rcv_offset, S0_get_size);
-				mem_pointer=S0_RX_RD + S0_get_size;
+				SPI_ETH_RD_RCV_REG_16(ETH , S0_get_start_address , ETH->data , S0_bf_rcv_offset, sizedata);
+				*mem_pointer=S0_RX_RD + sizedata;
 			}
-	return(S0_mem_pointer)*/
+	return(mem_pointer);
 }
 
 /*

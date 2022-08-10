@@ -146,11 +146,25 @@ enum
  S0_RX_RD_ADDR_BASEHH 	=	0x04, //S0_RX_RD0H
  S0_RX_RD_ADDR_BASEHL  	=	0x28, //S0_RX_RD0L
  S0_RX_RD_ADDR_BASELH 	=	0x04, //S0_RX_RD1H
- S0_RX_RD_ADDR_BASELL  	=	0x29 //S0_RX_RD1L
+ S0_RX_RD_ADDR_BASELL  	=	0x29  //S0_RX_RD1L
 
 };
 // ****** End SOCKET0  Registers Address ****** //
+// ****** Begin Socket COMMANDS Sn_MR ****** //
+enum
+{
+ MODE_CLOSED		=	0x00,
+ MODE_TCP 			=	0x01,
+ MODE_UDP 			=	0x02,
+ MODE_IPRAW  		=	0x04,
+ MODE_MACRAW 		=	0x08,
+ MODE_PPOE 			=	0x10,
+ MODE_ND			=	0x20,
+ MODE_MAC_FILTER  	=	0x40,
+ MODE_MULTICASTING	=	0x80
+};
 
+// ****** end Socket COMMANDS Sn_MR ****** //
 // ****** Begin Socket COMMANDS Sn_CR ****** //
 enum
 {
@@ -283,10 +297,21 @@ Example:    eth_wr_SOCKET_CMD(&ETH, 0, OPEN );
 
 /******************************************************************************/
 
+eth_wr_SOCKET_MODE(struct W5100_SPI *, uint8_t, uint8_t);
+/******************************************************************************
+	eth_wr_SOCKET_MODE Execute commands on Sn_MR
+
+First define structure to use "instance SPI"
+Insert mode to define refer to list "Begin Socket COMMANDS Sn_MR
+Insert Socket to apply mode
+
+Example:    eth_wr_SOCKET_MODE(&ETH, 0, MODE_TCP );
+
+/******************************************************************************/
 uint8_t eth_rd_SOCKET_CMD(struct W5100_SPI *, uint8_t);
 /******************************************************************************
 	eth_rd_SOCKET_CMD Read commands on Sn_CR
-
+After command execution, register is cleared, use this function to check it.
 First define structure to use "instance SPI"
 Insert Socket number to read command from
 
@@ -305,7 +330,7 @@ Example:    socket_status=eth_rd_SOCKET_STAT(&ETH, 0 );
 
 /******************************************************************************/
 
-uint16_t eth_rd_SOCKET_DATA(struct W5100_SPI *, uint8_t, uint16_t *);
+uint16_t eth_rd_SOCKET_DATA(struct W5100_SPI *, uint8_t, uint16_t *, uint16_t);
 /******************************************************************************
 	eth_rd_SOCKET_DATA Read Socket data received
 
@@ -321,6 +346,6 @@ uint16_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * ,
 uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI *  , uint16_t  , uint16_t );
 uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint8_t * , uint16_t);
 uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * , uint16_t, uint8_t * , uint16_t, uint16_t);
-
+uint16_t SPI_ETH_WR_TX_REG_16(struct W5100_SPI * , uint16_t, uint8_t * , uint16_t, uint16_t);
 void setVar_ETH(void);
 //#endif /* ETH_W5100_H_ */
