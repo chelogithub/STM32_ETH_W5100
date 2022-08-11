@@ -335,10 +335,26 @@ uint16_t eth_rd_SOCKET_DATA(struct W5100_SPI *, uint8_t, uint16_t *, uint16_t);
 	eth_rd_SOCKET_DATA Read Socket data received
 
 First define structure to use "instance SPI"
-Insert Socket to apply command
-Read data points to struct.data and struct.qty for amount of data.
+Insert Socket to read
+Insert pointer variable that will return read pointer
+Insert amount of data to be read
+Read data points to struct."data" and struct."qty" for amount of data.
 
-Example:    eth_rd_SOCKET_DATA(&ETH, 0 );
+Example:    eth_rd_SOCKET_DATA(&ETH, 0 ,&mem_pointer, data_qty);
+
+/******************************************************************************/
+
+uint16_t eth_wr_SOCKET_DATA(struct W5100_SPI *, uint8_t,uint16_t *, uint16_t);
+/******************************************************************************
+	eth_wr_SOCKET_DATA Write socket to send data
+
+First define structure to use "instance SPI"
+Insert Socket to read
+Insert pointer variable that will return read pointer
+Insert amount of data to be writen
+Read data points to struct."data" and struct."qty" for amount of data.
+
+Example:    eth_wr_SOCKET_DATA(&ETH, 0 ,&data_vector, data_qty);
 
 /******************************************************************************/
 

@@ -189,21 +189,56 @@ uint16_t  eth_rd_SOCKET_DATA(struct W5100_SPI * ETH, uint8_t socket, uint16_t * 
 			 S0_RX_RD=0,
 			 S0_get_offset=0,
 			 S0_get_start_address=0,
-			 S0_mem_pointer=0;
+			 S0_mem_pointer=0,
+			 RX_MASK=0,
+			 RX_BASE=0;
 	uint8_t spi_Data[2];
 
-
-	S0_RX_RD = SPI_ETH_REG(ETH, S0_RX_RD_ADDR_BASEHH,S0_RX_RD_ADDR_BASEHL ,SPI_READ, spi_Data,2);
-	S0_get_offset = S0_RX_RD & ETH->gS0_RX_MASK;
-	S0_get_start_address  = ETH->gS0_RX_BASE + S0_get_offset;
-	if((S0_get_offset  + sizedata )>(ETH->gS0_RX_MASK + 1))
+	switch (socket)
+	{
+		case 0 :
 		{
-			upper_size = (ETH->gS0_RX_MASK + 1) - S0_get_offset ;
+			RX_MASK=ETH->gS0_RX_MASK;
+			RX_BASE=ETH->gS0_RX_BASE;
+		}
+		break;
+		case 1 :
+		{
+			RX_MASK=ETH->gS1_RX_MASK;
+			RX_BASE=ETH->gS1_RX_BASE;
+		}
+		break;
+		case 2 :
+		{
+			RX_MASK=ETH->gS2_RX_MASK;
+			RX_BASE=ETH->gS2_RX_BASE;
+		}
+		break;
+		case 3 :
+		{
+			RX_MASK=ETH->gS3_RX_MASK;
+			RX_BASE=ETH->gS3_RX_BASE;
+		}
+		break;
+		default :
+		{
+			RX_MASK=ETH->gS0_RX_MASK;
+			RX_BASE=ETH->gS0_RX_BASE;
+		}
+		break;
+	}
+
+	S0_RX_RD = SPI_ETH_REG(ETH, S0_RX_RD_ADDR_BASEHH + socket ,S0_RX_RD_ADDR_BASEHL ,SPI_READ, spi_Data,2);
+	S0_get_offset = S0_RX_RD & RX_MASK;
+	S0_get_start_address  = RX_BASE + S0_get_offset;
+	if((S0_get_offset  + sizedata )>(RX_MASK + 1))
+		{
+			upper_size = (RX_MASK + 1) - S0_get_offset ;
 			SPI_ETH_RD_RCV_REG_16(ETH , S0_get_start_address , ETH->data , S0_bf_rcv_offset, upper_size);
 			destination_addr+=upper_size;
 			left_size=sizedata-upper_size;
 			S0_bf_rcv_offset=upper_size;
-			SPI_ETH_RD_RCV_REG_16(ETH , ETH->gS0_RX_BASE , ETH->data , S0_bf_rcv_offset, left_size);
+			SPI_ETH_RD_RCV_REG_16(ETH , RX_BASE , ETH->data , S0_bf_rcv_offset, left_size);
 			*mem_pointer=S0_RX_RD + sizedata;
 		}
 		else
@@ -214,6 +249,80 @@ uint16_t  eth_rd_SOCKET_DATA(struct W5100_SPI * ETH, uint8_t socket, uint16_t * 
 	return(mem_pointer);
 }
 
+uint16_t eth_wr_SOCKET_DATA(struct W5100_SPI * ETH, uint8_t socket, uint16_t * mem_pointer, uint16_t send_size)
+{
+	uint16_t S0_bf_rcv_offset=0,
+			 left_size=0,
+			 upper_size=0,
+			 source_addr=0,
+			 Sn_TX_WR=0,
+			 get_offset=0,
+			 get_free_size=0,
+			 get_start_address=0,
+			 S0_mem_pointer=0,
+			 TX_MASK=0,
+			 TX_BASE=0;
+	uint8_t spi_Data[2];
+
+	switch (socket)
+	{
+		case 0 :
+		{
+			TX_MASK=ETH->gS0_TX_MASK;
+			TX_BASE=ETH->gS0_TX_BASE;
+		}
+		break;
+		case 1 :
+		{
+			TX_MASK=ETH->gS1_TX_MASK;
+			TX_BASE=ETH->gS1_TX_BASE;
+		}
+		break;
+		case 2 :
+		{
+			TX_MASK=ETH->gS2_TX_MASK;
+			TX_BASE=ETH->gS2_TX_BASE;
+		}
+		break;
+		case 3 :
+		{
+			TX_MASK=ETH->gS3_TX_MASK;
+			TX_BASE=ETH->gS3_TX_BASE;
+		}
+		break;
+		default :
+		{
+			TX_MASK=ETH->gS0_TX_MASK;
+			TX_BASE=ETH->gS0_TX_BASE;
+		}
+		break;
+	}
+
+	while(get_free_size<send_size)
+			{
+				get_free_size=SPI_ETH_REG(ETH, 0x04 + socket, 0x20 ,SPI_READ, spi_Data,2); //Leo registro S0_TX_FSR	=   0x420,
+			}
+				Sn_TX_WR = SPI_ETH_REG(ETH, 0x04 + socket,0x24 ,SPI_READ, spi_Data,2); // S0_TX_RD =   0x424,
+				get_offset= Sn_TX_WR & TX_MASK;
+				get_start_address=TX_BASE + get_offset;
+
+				if((get_offset + send_size)>(TX_MASK + 1))
+					{
+						upper_size=( TX_MASK + 1) - get_offset;
+						SPI_ETH_WR_TX_REG_16(ETH , get_start_address , ETH->data , S0_bf_rcv_offset, upper_size);
+						source_addr+=upper_size;
+						left_size=send_size-upper_size;
+						S0_bf_rcv_offset=upper_size;
+						SPI_ETH_WR_TX_REG_16(ETH , TX_BASE , ETH->data , S0_bf_rcv_offset, left_size);
+						*mem_pointer=Sn_TX_WR + send_size;
+					}
+				else
+					{
+					SPI_ETH_WR_TX_REG_16(ETH , get_start_address , ETH->data , S0_bf_rcv_offset, send_size);
+					*mem_pointer=Sn_TX_WR + send_size;
+					}
+
+}
 /*
  *
  *  ITM0_Write("\r\n SET-UP W5100 \r\n",strlen("\r\n SET-UP W5100 \r\n"));
