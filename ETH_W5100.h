@@ -212,14 +212,14 @@ enum
 
 struct W5100_SPI
 {
-	SPI_HandleTypeDef *SPI;		//Hardware SPI tp implement
-	GPIO_TypeDef  *PORT;		//Port for NSS
-	uint16_t PIN;				//Pin number
-	uint8_t operacion;			//Define operation read /write
+	SPI_HandleTypeDef *SPI;			//Hardware SPI tp implement
+	GPIO_TypeDef  *NSS_PORT;		//Port for NSS
+	uint16_t NSS_PIN;				//Pin number
+	uint8_t operacion;				//Define operation read /write
 
-uint8_t     TX[4],				//Vector for TX SPI commands
-			RX[4],				//Vector for RX SPI commands
-			data[2048],			//Data readed from SPI
+uint8_t     TX[4],					//Vector for TX SPI commands
+			RX[4],					//Vector for RX SPI commands
+			data[2048],				//Data readed from SPI
 
 			GAR[4],
 			SUBR[4],
@@ -233,10 +233,16 @@ uint8_t     TX[4],				//Vector for TX SPI commands
 			UIPR[4],
 			UPORT[2],
 
-			socket_PORT[2],
-			socket_HAR[6],
-			socket_IP[4],
-			socket_remote_PORT[2];
+			S0_PORT[2],
+			S0_DIPR[4],
+			S0_DPORT[2],
+
+
+			S0_ENserver,
+			S1_server,
+			S2_server,
+			S3_server;
+
 
 uint16_t    gS0_RX_BASE ,
 			gS0_RX_MASK ,
@@ -357,6 +363,30 @@ Read data points to struct."data" and struct."qty" for amount of data.
 Example:    eth_wr_SOCKET_DATA(&ETH, 0 ,&data_vector, data_qty);
 
 /******************************************************************************/
+
+uint8_t eth_init(struct W5100_SPI *);
+/******************************************************************************
+	eth_init Initializes modules
+
+First define structure to use "instance SPI"
+
+
+Example:    eth_init(&ETH);
+
+/******************************************************************************/
+uint8_t eth_socket_init(struct W5100_SPI *, uint8_t);
+/******************************************************************************
+	eth_socket_init Initializes socket
+
+First define structure to use "instance SPI"
+Insert socket number
+
+
+Example:    eth_socket_init(&ETH, uint8_t);
+
+/******************************************************************************/
+
+
 
 uint16_t SPI_ETH_REG(struct W5100_SPI *, uint8_t ,uint8_t ,uint8_t , uint8_t * , uint8_t );
 uint16_t SPI_ETH_WR_REG_16(struct W5100_SPI *  , uint16_t  , uint16_t );
