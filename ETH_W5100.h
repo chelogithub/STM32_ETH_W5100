@@ -220,7 +220,7 @@ struct W5100_SPI
 uint8_t     TX[4],					//Vector for TX SPI commands
 			RX[4],					//Vector for RX SPI commands
 			data[2048],				//Data readed from SPI
-
+			swap[2048],				//VECTOR DE INTERCAMBIO A DEFINIR
 			GAR[4],
 			SUBR[4],
 			SHAR[6],
@@ -239,9 +239,9 @@ uint8_t     TX[4],					//Vector for TX SPI commands
 
 
 			S0_ENserver,
-			S1_server,
-			S2_server,
-			S3_server;
+			S1_ENserver,
+			S2_ENserver,
+			S3_ENserver;
 
 
 uint16_t    gS0_RX_BASE ,
@@ -264,6 +264,8 @@ uint16_t    gS0_RX_BASE ,
 
 
 };
+
+
 
 
 // End Socket SPI

@@ -180,14 +180,31 @@ uint8_t eth_init(struct W5100_SPI * ETH)
 
 uint8_t eth_socket_init(struct W5100_SPI * ETH, uint8_t socket)
 {
-	 eth_wr_SOCKET_MODE(ETH,socket, MODE_TCP);																					//same for server and client
+	 eth_wr_SOCKET_MODE(ETH,socket, MODE_TCP);																				//same for server and client
 	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP SET"));									//same for server and client
 	 SPI_ETH_REG(ETH, S0_PORT_ADDR_BASELH,S0_PORT_ADDR_BASELL,SPI_WRITE, ETH->S0_PORT,2);									//same for server and client
+
+	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP REMOTE IP TO CONNECT\r\n",strlen("\r\nETH-W5100-SOCK0 TCP REMOTE IP TO CONNECT\r\n"));									// client
+	 SPI_ETH_REG(ETH, 0x04,0x0C,SPI_WRITE, ETH->S0_DIPR,4);									// client
+	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP REMOTE PORT TO CONNECT\r\n",strlen("\r\nETH-W5100-SOCK0 TCP REMOTE PORT TO CONNECT\r\n"));									// client
+	 SPI_ETH_REG(ETH, 0x04,0x10,SPI_WRITE, ETH->S0_DPORT,2);									// client
+
+
 	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n"));						//same for server and client
-	 eth_wr_SOCKET_CMD(ETH,socket, OPEN);																						//same for server and client
+	 eth_wr_SOCKET_CMD(ETH,socket, OPEN);																					//same for server and client
 	 ITM0_Write("\r\nETH-W5100-OPEN SOCKET\r\n",strlen("\r\nETH-W5100-OPEN SOCKET\r\n"));									//same for server and client
-	 eth_wr_SOCKET_CMD(ETH,socket, LISTEN);																						//only for server
-	 ITM0_Write("\r\nETH-W5100-LISTEN SOCKET\r\n",strlen("\r\nETH-W5100-LISTEN SOCKET\r\n"));								//only fir server
+
+	 if(ETH->S0_ENserver == 1)
+	 {
+		 eth_wr_SOCKET_CMD(ETH,socket, LISTEN);																				//only for server
+		 ITM0_Write("\r\nETH-W5100-LISTEN SOCKET\r\n",strlen("\r\nETH-W5100-LISTEN SOCKET\r\n"));							//only for server
+	 }
+	 else
+	 {
+
+		 	 eth_wr_SOCKET_CMD(ETH,socket, CONNECT);																				//only for server
+			 ITM0_Write("\r\nETH-W5100-CONNECT\r\n",strlen("\r\nETH-W5100-CONNECT\r\n"));											//only fir server
+	 }
 }
 
 uint8_t eth_rd_SOCKET_STAT(struct  W5100_SPI * y, uint8_t socket)
