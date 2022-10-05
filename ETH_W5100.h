@@ -217,7 +217,15 @@ struct W5100_SPI
 	uint16_t NSS_PIN;				//Pin number
 	uint8_t operacion;				//Define operation read /write
 
-uint8_t     TX[4],					//Vector for TX SPI commands
+
+uint16_t	ETH_WDG;
+uint8_t     S0_status,
+			S1_status,
+			S2_status,
+			S3_status,
+			S0_data_available,
+			S0_data_readed,
+			TX[4],					//Vector for TX SPI commands
 			RX[4],					//Vector for RX SPI commands
 			data[2048],				//Data readed from SPI
 			swap[2048],				//VECTOR DE INTERCAMBIO A DEFINIR

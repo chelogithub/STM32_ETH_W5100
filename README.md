@@ -270,3 +270,5 @@ uint8 IINCHIP_WRITE(uint16 addr,uint8 data)
 #define IINCHIP_SpiInit					SPI0_Init
 #define IINCHIP_SpiSendData				SPI0_SendByte	
 #define IINCHIP_SpiRecvData				SPI0_RxData
+
+05/10/22 Si el socket permanece en cero mas de 5 segundos luego de iniciar la comunicacon, ejecuto el reinicio, dado que al estar desconectado el cable el socket igual pasa al valor 1 para enviar el mensaje de arp y así luego establecer la conexión.
