@@ -404,4 +404,5 @@ uint16_t SPI_ETH_RD_REG_16(struct W5100_SPI * , uint16_t , uint8_t , uint8_t * ,
 uint16_t SPI_ETH_RD_RCV_REG_16(struct W5100_SPI * , uint16_t, uint8_t * , uint16_t, uint16_t);
 uint16_t SPI_ETH_WR_TX_REG_16(struct W5100_SPI * , uint16_t, uint8_t * , uint16_t, uint16_t);
 void setVar_ETH(void);
+//HOLA
 //#endif /* ETH_W5100_H_ */
