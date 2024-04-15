@@ -164,40 +164,40 @@ eth_wr_SOCKET_MODE(struct  W5100_SPI * y, uint8_t s, uint8_t z)
 uint8_t eth_init(struct W5100_SPI * ETH)
 {
 	 SPI_ETH_REG(ETH, GAR_ADDR_BASEH,GAR_ADDR_BASEL,SPI_WRITE, ETH->GAR,4);													//same for server and client
-	 ITM0_Write("\r\nETH-W5100-GATEWAY SET\r\n",strlen("\r\nETH-W5100-GATEWAY SET\r\n"));									//same for server and client
+	 // ITM0_Write("\r\nETH-W5100-GATEWAY SET\r\n",strlen("\r\nETH-W5100-GATEWAY SET\r\n"));									//same for server and client
 	 SPI_ETH_REG(ETH, SUBR_ADDR_BASEH,SUBR_ADDR_BASEL,SPI_WRITE, ETH->SUBR,4);												//same for server and client
-	 ITM0_Write("\r\nETH-W5100-SUBNET SET\r\n",strlen("\r\nETH-W5100-SUBNET SET"));											//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-SUBNET SET\r\n",strlen("\r\nETH-W5100-SUBNET SET"));											//same for server and client
 	 SPI_ETH_REG(ETH, SHAR_ADDR_BASEH,SHAR_ADDR_BASEL,SPI_WRITE, ETH->SHAR,6);												//same for server and client
-	 ITM0_Write("\r\nETH-W5100-MAC SET\r\n",strlen("\r\nETH-W5100-MAC SET"));												//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-MAC SET\r\n",strlen("\r\nETH-W5100-MAC SET"));												//same for server and client
 	 SPI_ETH_REG(ETH, SIPR_ADDR_BASEH,SIPR_ADDR_BASEL,SPI_WRITE, ETH->SIPR,4);												//same for server and client
-	 ITM0_Write("\r\nETH-W5100-IP SET\r\n",strlen("\r\nETH-W5100-IP SET"));													//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-IP SET\r\n",strlen("\r\nETH-W5100-IP SET"));													//same for server and client
 	 SPI_ETH_REG(ETH, RMSR_ADDR_BASEH,RMSR_ADDR_BASEL,SPI_WRITE, &ETH->RMSR,1);												//same for server and client
-	 ITM0_Write("\r\nETH-W5100-DEFINE SOCKET RX MEMORY 2K\r\n",strlen("\r\nETH-W5100-DEFINE SOCKET RX MEMORY 2K\r\n")); 	//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-DEFINE SOCKET RX MEMORY 2K\r\n",strlen("\r\nETH-W5100-DEFINE SOCKET RX MEMORY 2K\r\n")); 	//same for server and client
 	 SPI_ETH_REG(ETH, TMSR_ADDR_BASEH,TMSR_ADDR_BASEL,SPI_WRITE, &ETH->TMSR,1);												//same for server and client
-	 ITM0_Write("\r\nETH-W5100-DEFINE SOCKET TX MEMORY 2K\r\n",strlen("\r\nETH-W5100-DEFINE SOCKET TX MEMORY 2K\r\n"));		//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-DEFINE SOCKET TX MEMORY 2K\r\n",strlen("\r\nETH-W5100-DEFINE SOCKET TX MEMORY 2K\r\n"));		//same for server and client
 
 }
 
 uint8_t eth_socket_init(struct W5100_SPI * ETH, uint8_t socket)
 {
 	 eth_wr_SOCKET_MODE(ETH,socket, MODE_TCP);																				//same for server and client
-	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP SET"));									//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-SOCK0 TCP SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP SET"));									//same for server and client
 	 SPI_ETH_REG(ETH, S0_PORT_ADDR_BASELH,S0_PORT_ADDR_BASELL,SPI_WRITE, ETH->S0_PORT,2);									//same for server and client
 
-	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP REMOTE IP TO CONNECT\r\n",strlen("\r\nETH-W5100-SOCK0 TCP REMOTE IP TO CONNECT\r\n"));									// client
+	 //ITM0_Write("\r\nETH-W5100-SOCK0 TCP REMOTE IP TO CONNECT\r\n",strlen("\r\nETH-W5100-SOCK0 TCP REMOTE IP TO CONNECT\r\n"));									// client
 	 SPI_ETH_REG(ETH, 0x04,0x0C,SPI_WRITE, ETH->S0_DIPR,4);									// client
-	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP REMOTE PORT TO CONNECT\r\n",strlen("\r\nETH-W5100-SOCK0 TCP REMOTE PORT TO CONNECT\r\n"));									// client
+	 //ITM0_Write("\r\nETH-W5100-SOCK0 TCP REMOTE PORT TO CONNECT\r\n",strlen("\r\nETH-W5100-SOCK0 TCP REMOTE PORT TO CONNECT\r\n"));									// client
 	 SPI_ETH_REG(ETH, 0x04,0x10,SPI_WRITE, ETH->S0_DPORT,2);									// client
 
 
-	 ITM0_Write("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n"));						//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n",strlen("\r\nETH-W5100-SOCK0 TCP PORT SET\r\n"));						//same for server and client
 	 eth_wr_SOCKET_CMD(ETH,socket, OPEN);																					//same for server and client
-	 ITM0_Write("\r\nETH-W5100-OPEN SOCKET\r\n",strlen("\r\nETH-W5100-OPEN SOCKET\r\n"));									//same for server and client
+	 //ITM0_Write("\r\nETH-W5100-OPEN SOCKET\r\n",strlen("\r\nETH-W5100-OPEN SOCKET\r\n"));									//same for server and client
 
 	 if(ETH->S0_ENserver == 1)
 	 {
 		 eth_wr_SOCKET_CMD(ETH,socket, LISTEN);																				//only for server
-		 ITM0_Write("\r\nETH-W5100-LISTEN SOCKET\r\n",strlen("\r\nETH-W5100-LISTEN SOCKET\r\n"));							//only for server
+		 //ITM0_Write("\r\nETH-W5100-LISTEN SOCKET\r\n",strlen("\r\nETH-W5100-LISTEN SOCKET\r\n"));							//only for server
 	 }
 	 else
 	 {
